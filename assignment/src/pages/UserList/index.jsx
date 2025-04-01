@@ -2,7 +2,7 @@ import * as React from 'react';
 import {useEffect, useState} from "react";
 import UserService from "../../services/user.service.js";
 import { Link} from "react-router";
-import {Button, Rating} from "@mui/material";
+import {Button, Rating,Pagination} from "@mui/material";
 import FormSearch from "./FormSearch.jsx";
 import RoleService from "../../services/role.service.js";
 import {toast} from "react-toastify";
@@ -13,22 +13,26 @@ function UserList() {
     const [selectedRole, setSelectedRole] = useState("");
     const [reloadData, setReloadData] = useState(false);
 
+    // State phân trang
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 5; // Số lượng user hiển thị trên mỗi trang
+
     useEffect(() => {
-        // Fetch all roles
         RoleService.getAllRoles().then(res => {
             setRoles(res.data);
         });
     }, []);
 
     useEffect(() => {
-        // Fetch users based on selectedRole
         if (selectedRole) {
             UserService.getUsersByRole(selectedRole).then(res => {
                 setUsers(res.data);
+                setCurrentPage(1); // Reset về trang đầu khi filter
             });
         } else {
             UserService.getAllUser().then(res => {
                 setUsers(res.data);
+                setCurrentPage(1);
             });
         }
     }, [reloadData, selectedRole]);
@@ -37,7 +41,6 @@ function UserList() {
         if (window.confirm('Are you sure you want to delete?')) {
             UserService.deleteUserById(id).then(() => {
                 alert("User deleted successfully");
-                // toast.success("User deleted successfully")
                 setReloadData(!reloadData);
             });
         }
@@ -47,6 +50,7 @@ function UserList() {
         const keyword = e.target.value;
         UserService.searchUserByName(keyword).then(res => {
             setUsers(res.data);
+            setCurrentPage(1);
         });
     };
 
@@ -57,10 +61,14 @@ function UserList() {
     const handleRatingUser = (newRating, id) => {
         UserService.updateRatingUser(newRating, id).then(() => {
             alert("User rating updated successfully");
-            // toast.success("User rating updated successfully")
             setReloadData(!reloadData);
         });
     };
+
+    // Tính toán user hiển thị dựa trên trang hiện tại
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
     return (
         <div className="d-flex flex-column align-items-center vh-100">
@@ -75,9 +83,7 @@ function UserList() {
             <div className="card shadow p-4 w-75">
                 <h5 className="card-header">User List</h5>
                 <div className="card-body">
-                    {/* Hàng chứa dropdown role + ô tìm kiếm */}
                     <div className="d-flex justify-content-between mb-3">
-                        {/* Dropdown Filter by Role */}
                         <div className="w-25">
                             <select className="form-select" value={selectedRole} onChange={handleRoleChange}>
                                 <option value="">All Roles</option>
@@ -87,13 +93,11 @@ function UserList() {
                             </select>
                         </div>
 
-                        {/* Ô tìm kiếm */}
                         <div className="w-50">
                             <FormSearch handleActionSearch={handleSearchUser}/>
                         </div>
                     </div>
 
-                    {/* Bảng danh sách Users */}
                     <table className="table table-bordered">
                         <thead>
                         <tr>
@@ -106,10 +110,10 @@ function UserList() {
                         </tr>
                         </thead>
                         <tbody>
-                        {users.length > 0 ? (
-                            users.map((user, index) => (
+                        {currentUsers.length > 0 ? (
+                            currentUsers.map((user, index) => (
                                 <tr key={user.id}>
-                                    <td>{index + 1}</td>
+                                    <td>{indexOfFirstUser + index + 1}</td>
                                     <td>{user.name}</td>
                                     <td>{user.email}</td>
                                     <td>{roles.find(r => r.id === user.roleId)?.name || "Unknown"}</td>
@@ -140,6 +144,16 @@ function UserList() {
                         )}
                         </tbody>
                     </table>
+
+                    {/* Phân trang */}
+                    <div className="d-flex justify-content-center mt-3">
+                        <Pagination
+                            count={Math.ceil(users.length / usersPerPage)}
+                            page={currentPage}
+                            onChange={(event, value) => setCurrentPage(value)}
+                            color="primary"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
