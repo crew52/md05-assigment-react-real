@@ -1,30 +1,13 @@
 import * as React from 'react';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
 import {useEffect, useState} from "react";
 import UserService from "../../services/user.service.js";
+import { Link} from "react-router";
+import {Button, Rating} from "@mui/material";
+import FormSearch from "./FormSearch.jsx";
 
 export default function UserList() {
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-    // user
     const  [users, setUsers] = useState([])
 
-    const columns = [
-        { id: 'id', label: 'ID', minWidth: 50 },
-        { id: 'name', label: 'Name', minWidth: 150 },
-        { id: 'email', label: 'Email', minWidth: 200 },
-        { id: 'phone', label: 'Phone', minWidth: 120 },
-        { id: 'rating', label: 'Rating', minWidth: 100 },
-        { id: 'role', label: 'Role', minWidth: 120 }, // Hiển thị role.name thay vì object role
-    ];
 
     useEffect(() => {
         UserService.getAllUser().then(res => {
@@ -33,68 +16,75 @@ export default function UserList() {
 
     }, []);
 
-    const handleChangePage = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(+event.target.value);
-        setPage(0);
-    };
+    const handleSearchUser = (e) => {
+        const keyword = e.target.value;
+        UserService.searchUserByName(keyword).then(res => {
+            setUsers(res.data)
+        })
+    }
 
     return (
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-            <TableContainer sx={{ maxHeight: 440 }}>
-                <Table stickyHeader aria-label="sticky table">
-                    <TableHead>
-                        <TableRow>
-                            {columns.map((column) => (
-                                <TableCell
-                                    key={column.id}
-                                    align={column.align}
-                                    style={{ minWidth: column.minWidth }}
-                                >
-                                    {column.label}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {users
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((row) => {
-                                return (
-                                    <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
-                                        {columns.map((column) => {
-                                            let value = row[column.id];
+        <>
+            <div className="card mt-2">
+                <div className="row">
+                    <div className="col-12 col-md-12">
+                        <h5 className="card-header">
+                            <div className="row">
+                                <div className="col-md-4">
+                                    <span className={"me-2"}>User List</span>
+                                    <Link to={"/admin/users/create"}>
+                                        <Button variant={"contained"}>Create</Button>
+                                    </Link>
+                                </div>
+                                <div className="col-md-8">
+                                    <FormSearch handleActionSearch={handleSearchUser}/>
+                                </div>
+                            </div>
+                        </h5>
+                        <div className="card-body">
+                            <table className="table">
+                                <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Rating</th>
+                                    <th scope="col">Handle</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {users.map((user, index) => (
+                                    <tr key={user.id}>
+                                        <th scope="row">{index + 1}</th>
+                                        <td>{user.name}</td>
+                                        <td>{user.email}</td>
+                                        <td>
+                                            <Rating
+                                                name="simple-controlled"
+                                                value={user.rating}
+                                                onChange={(event, newValue) => {
+                                                    handleRatingUser(newValue, user.id)
+                                                }}/>
+                                        </td>
+                                        <td>
+                                            <Link to={`/admin/users/${user.id}/edit`}>
+                                                <button type="button" className="btn btn-primary">Edit</button>
+                                            </Link>
 
-                                            // Kiểm tra nếu là object (role), lấy role.name
-                                            if (column.id === 'role' && typeof value === 'object' && value !== null) {
-                                                value = value.name;
-                                            }
+                                            <button type="button" className="btn btn-danger"
+                                                    onClick={() => handleDeleteUser(user.id)}>Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
-                                            return (
-                                                <TableCell key={column.id} align={column.align}>
-                                                    {value}
-                                                </TableCell>
-                                            );
-                                        })}
-                                    </TableRow>
-                                );
-                            })}
-                    </TableBody>
+            </div>
 
-                </Table>
-            </TableContainer>
-            <TablePagination
-                rowsPerPageOptions={[10, 25, 100]}
-                component="div"
-                count={users.length}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-        </Paper>
-    );
+        </>
+    )
 }
