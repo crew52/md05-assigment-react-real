@@ -29,6 +29,12 @@ class UserService {
     static async searchUserByName(name) {
         return await axiosInstance.get(`/users?name_like=${name}&_expand=role`)
     }
+
+    static async getUsersByRole(roleId) {
+        return await axiosInstance.get(`/users?roleId=${roleId}`);
+    }
 }
+
+
 
 export default UserService;
