@@ -5,8 +5,25 @@ import { Link} from "react-router";
 import {Button, Rating} from "@mui/material";
 import FormSearch from "./FormSearch.jsx";
 
-export default function UserList() {
+function UserList() {
     const  [users, setUsers] = useState([])
+    const [reloadData, serReloadData] = useState(false)
+
+    const handleDeleteUser = (id) => {
+        if (window.confirm('Are you sure you want to delete')) {
+            UserService.deleteUserById(id).then(res => {
+                alert("Delete user successfully")
+                serReloadData(!reloadData);
+            })
+        }
+    }
+
+    const handleSearchUser = (e) => {
+        const keyword = e.target.value;
+        UserService.searchUserByName(keyword).then(res => {
+            setUsers(res.data)
+        })
+    }
 
 
     useEffect(() => {
@@ -14,12 +31,13 @@ export default function UserList() {
             setUsers(res.data)
         })
 
-    }, []);
+    }, [reloadData]);
 
-    const handleSearchUser = (e) => {
-        const keyword = e.target.value;
-        UserService.searchUserByName(keyword).then(res => {
-            setUsers(res.data)
+
+    const handleRatingUser = (newRating, id) => {
+        UserService.updateRatingUser(newRating, id).then(res => {
+            alert("Update rating user successfully")
+            serReloadData(!reloadData);
         })
     }
 
@@ -88,3 +106,5 @@ export default function UserList() {
         </>
     )
 }
+
+export default UserList
