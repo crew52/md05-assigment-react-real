@@ -5,6 +5,7 @@ import { Link} from "react-router";
 import {Button, Rating} from "@mui/material";
 import FormSearch from "./FormSearch.jsx";
 import RoleService from "../../services/role.service.js";
+import {toast} from "react-toastify";
 
 function UserList() {
     const [users, setUsers] = useState([]);
@@ -36,6 +37,7 @@ function UserList() {
         if (window.confirm('Are you sure you want to delete?')) {
             UserService.deleteUserById(id).then(() => {
                 alert("User deleted successfully");
+                // toast.success("User deleted successfully")
                 setReloadData(!reloadData);
             });
         }
@@ -55,6 +57,7 @@ function UserList() {
     const handleRatingUser = (newRating, id) => {
         UserService.updateRatingUser(newRating, id).then(() => {
             alert("User rating updated successfully");
+            // toast.success("User rating updated successfully")
             setReloadData(!reloadData);
         });
     };
@@ -63,7 +66,7 @@ function UserList() {
         <div className="d-flex flex-column align-items-center vh-100">
             {/* Nút Create bên ngoài Card */}
             <div className="w-75 mb-3 text-end">
-                <Link to="/admin/users/create">
+                <Link to="/users/create">
                     <Button variant="contained">Create</Button>
                 </Link>
             </div>
