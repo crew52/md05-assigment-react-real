@@ -121,8 +121,11 @@ function UserList() {
                                         />
                                     </td>
                                     <td>
-                                        <Link to={`/admin/users/${user.id}/edit`}>
+                                        <Link to={`/users/${user.id}/edit`}>
                                             <button className="btn btn-primary me-2">Edit</button>
+                                        </Link>
+                                        <Link to={`/users/${user.id}/detail`}>
+                                            <button className="btn btn-danger me-2">Detail</button>
                                         </Link>
                                         <button className="btn btn-danger" onClick={() => handleDeleteUser(user.id)}>
                                             Delete

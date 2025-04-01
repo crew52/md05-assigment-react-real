@@ -1,28 +1,46 @@
+import { useNavigate, useParams } from "react-router";
 import {
-    Card, CardContent, CardHeader, FormControl,
-    Box, TextField, FormControlLabel,
-    FormLabel, RadioGroup, Radio, Button
+    Box, Button,
+    Card,
+    CardContent,
+    CardHeader,
+    FormControl,
+    FormControlLabel,
+    FormLabel, Radio,
+    RadioGroup,
+    TextField
 } from "@mui/material";
-import {useEffect, useState} from "react";
-import {useFormik} from "formik";
-import {toast} from "react-toastify";
-import {useNavigate} from "react-router";
+import { useEffect, useState } from "react";
 import RoleService from "../../services/role.service.js";
+import { useFormik } from "formik";
 import UserService from "../../services/user.service.js";
+import { toast } from "react-toastify";
 import * as Yup from 'yup';
 
-function UserCreate() {
+function UserEdit() {
+    const { uid } = useParams();
     const [roles, setRoles] = useState([]);
+    const [currentRole, setCurrentRole] = useState(1);
     const navigate = useNavigate();
-
 
     useEffect(() => {
         RoleService.getAllRoles().then(res => {
             setRoles(res.data)
-        })
-    }, [])
+        });
 
-    const creatUserForm = useFormik({
+        UserService.getUserById(uid).then(res => {
+            updateUserForm.setValues({
+                name: res.data.name,
+                email: res.data.email,
+                phone: res.data.phone,
+                roleId: res.data.roleId,
+                rating: res.data.rating,
+            });
+            setCurrentRole(res.data.roleId);
+        })
+    }, [uid]);
+
+    const updateUserForm = useFormik({
         initialValues: {
             name: "",
             email: "",
@@ -38,24 +56,30 @@ function UserCreate() {
         }),
         onSubmit: values => {
             console.log(values);
-            UserService.createUser(values).then(res => {
-                // toast.success("Create user successfully");
-                alert("Create user successfully");
-                navigate("/users")
+            UserService.updateUser(values, uid).then(() => {
+                toast.success("Update user successfully");
+                navigate("/users");
+            }).catch(error => {
+                toast.error("Failed to update user");
             })
         }
-    })
+    });
+
+    const handleChangeRole = (e) => {
+        setCurrentRole(e.target.value);
+        updateUserForm.setFieldValue("roleId", +e.target.value);
+    };
 
     return (
         <Card>
-            <CardHeader title="Create user" />
+            <CardHeader title="Update user" />
             <CardContent>
                 <Box
                     component="form"
                     sx={{ '& .MuiTextField-root': { m: 1, width: '50ch' } }}
                     noValidate
                     autoComplete="off"
-                    onSubmit={creatUserForm.handleSubmit}
+                    onSubmit={updateUserForm.handleSubmit}
                 >
                     <div>
                         <TextField
@@ -64,10 +88,10 @@ function UserCreate() {
                             label="Name"
                             name="name"
                             type="text"
-                            onChange={creatUserForm.handleChange}
-                            value={creatUserForm.values.name}
-                            error={Boolean(creatUserForm.errors.name && creatUserForm.touched.name)}
-                            helperText={creatUserForm.errors.name && creatUserForm.touched.name && creatUserForm.errors.name}
+                            value={updateUserForm.values.name}
+                            error={Boolean(updateUserForm.errors.name && updateUserForm.touched.name)}
+                            helperText={updateUserForm.errors.name && updateUserForm.touched.name && updateUserForm.errors.name}
+                            onChange={updateUserForm.handleChange}
                         />
                     </div>
 
@@ -78,10 +102,10 @@ function UserCreate() {
                             label="Email"
                             type="email"
                             name="email"
-                            onChange={creatUserForm.handleChange}
-                            value={creatUserForm.values.email}
-                            error={Boolean(creatUserForm.errors.email && creatUserForm.touched.email)}
-                            helperText={creatUserForm.errors.email && creatUserForm.touched.email && creatUserForm.errors.email}
+                            value={updateUserForm.values.email}
+                            error={Boolean(updateUserForm.errors.email && updateUserForm.touched.email)}
+                            helperText={updateUserForm.errors.email && updateUserForm.touched.email && updateUserForm.errors.email}
+                            onChange={updateUserForm.handleChange}
                         />
                     </div>
 
@@ -92,37 +116,37 @@ function UserCreate() {
                             label="Phone"
                             type="text"
                             name="phone"
-                            onChange={creatUserForm.handleChange}
-                            value={creatUserForm.values.phone}
-                            error={Boolean(creatUserForm.errors.phone && creatUserForm.touched.phone)}
-                            helperText={creatUserForm.errors.phone && creatUserForm.touched.phone && creatUserForm.errors.phone}
+                            value={updateUserForm.values.phone}
+                            error={Boolean(updateUserForm.errors.phone && updateUserForm.touched.phone)}
+                            helperText={updateUserForm.errors.phone && updateUserForm.touched.phone && updateUserForm.errors.phone}
+                            onChange={updateUserForm.handleChange}
                         />
                     </div>
 
                     <div>
                         <FormControl>
-                            <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
+                            <FormLabel id="demo-radio-buttons-group-label">Role</FormLabel>
                             <RadioGroup
                                 aria-labelledby="demo-radio-buttons-group-label"
-                                defaultValue="female"
+                                value={currentRole}
                                 name="roleId"
-                                onChange={e => creatUserForm.setFieldValue("roleId", parseInt(e.target.value))}
+                                onChange={handleChangeRole}
                             >
                                 {roles.map(role => (
                                     <FormControlLabel key={role.id} value={role.id} control={<Radio />} label={role.name} />
                                 ))}
                             </RadioGroup>
-                            {creatUserForm.errors.roleId && creatUserForm.touched.roleId && (
-                                <div style={{ color: 'red' }}>{creatUserForm.errors.roleId}</div>
+                            {updateUserForm.errors.roleId && updateUserForm.touched.roleId && (
+                                <div style={{ color: 'red' }}>{updateUserForm.errors.roleId}</div>
                             )}
                         </FormControl>
                     </div>
 
-                    <Button type="submit" variant="contained">Create</Button>
+                    <Button type="submit" variant="contained">Update</Button>
                 </Box>
             </CardContent>
         </Card>
     );
 }
 
-export default UserCreate
+export default UserEdit;
