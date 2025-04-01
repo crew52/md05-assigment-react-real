@@ -9,6 +9,7 @@ import {toast} from "react-toastify";
 import {useNavigate} from "react-router";
 import RoleService from "../../services/role.service.js";
 import UserService from "../../services/user.service.js";
+import * as Yup from 'yup';
 
 function UserCreate() {
     const [roles, setRoles] = useState([]);
@@ -29,6 +30,12 @@ function UserCreate() {
             roleId: "",
             rating: 0
         },
+        validationSchema: Yup.object({
+            name: Yup.string().required("Name is required").min(2, "Name must be at least 2 characters"),
+            email: Yup.string().email("Invalid email format").required("Email is required"),
+            phone: Yup.string().required("Phone number is required").matches(/^\d{10}$/, "Phone number must be 10 digits"),
+            roleId: Yup.string().required("Role is required")
+        }),
         onSubmit: values => {
             console.log(values);
             UserService.createUser(values).then(res => {
@@ -40,11 +47,11 @@ function UserCreate() {
 
     return (
         <Card>
-            <CardHeader title="Create user"></CardHeader>
+            <CardHeader title="Create user" />
             <CardContent>
                 <Box
                     component="form"
-                    sx={{'& .MuiTextField-root': {m: 1, width: '50ch'}}}
+                    sx={{ '& .MuiTextField-root': { m: 1, width: '50ch' } }}
                     noValidate
                     autoComplete="off"
                     onSubmit={creatUserForm.handleSubmit}
@@ -54,9 +61,12 @@ function UserCreate() {
                             required
                             id="outlined-required"
                             label="Name"
-                            name={"name"}
-                            type={"text"}
+                            name="name"
+                            type="text"
                             onChange={creatUserForm.handleChange}
+                            value={creatUserForm.values.name}
+                            error={Boolean(creatUserForm.errors.name && creatUserForm.touched.name)}
+                            helperText={creatUserForm.errors.name && creatUserForm.touched.name && creatUserForm.errors.name}
                         />
                     </div>
 
@@ -65,21 +75,29 @@ function UserCreate() {
                             required
                             id="outlined-required"
                             label="Email"
-                            type={"email"}
-                            name={"email"}
+                            type="email"
+                            name="email"
                             onChange={creatUserForm.handleChange}
+                            value={creatUserForm.values.email}
+                            error={Boolean(creatUserForm.errors.email && creatUserForm.touched.email)}
+                            helperText={creatUserForm.errors.email && creatUserForm.touched.email && creatUserForm.errors.email}
                         />
                     </div>
+
                     <div>
                         <TextField
                             required
                             id="outlined-required"
                             label="Phone"
-                            type={"text"}
-                            name={"phone"}
+                            type="text"
+                            name="phone"
                             onChange={creatUserForm.handleChange}
+                            value={creatUserForm.values.phone}
+                            error={Boolean(creatUserForm.errors.phone && creatUserForm.touched.phone)}
+                            helperText={creatUserForm.errors.phone && creatUserForm.touched.phone && creatUserForm.errors.phone}
                         />
                     </div>
+
                     <div>
                         <FormControl>
                             <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
@@ -89,18 +107,21 @@ function UserCreate() {
                                 name="roleId"
                                 onChange={e => creatUserForm.setFieldValue("roleId", parseInt(e.target.value))}
                             >
-                                { roles.map(role => (
+                                {roles.map(role => (
                                     <FormControlLabel key={role.id} value={role.id} control={<Radio />} label={role.name} />
                                 ))}
                             </RadioGroup>
+                            {creatUserForm.errors.roleId && creatUserForm.touched.roleId && (
+                                <div style={{ color: 'red' }}>{creatUserForm.errors.roleId}</div>
+                            )}
                         </FormControl>
                     </div>
-                    <Button type={"submit"} variant={"contained"}>Create</Button>
 
+                    <Button type="submit" variant="contained">Create</Button>
                 </Box>
             </CardContent>
         </Card>
-    )
+    );
 }
 
 export default UserCreate
