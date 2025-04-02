@@ -33,6 +33,16 @@ class UserService {
     static async getUsersByRole(roleId) {
         return await axiosInstance.get(`/users?roleId=${roleId}`);
     }
+
+    static async getUsersByNameAndRole(name, roleId) {
+        const queryParams = [];
+        if (name) queryParams.push(`name_like=${name}`);
+        if (roleId) queryParams.push(`roleId=${roleId}`);
+        const queryString = queryParams.length ? `?${queryParams.join("&")}&_expand=role` : "?_expand=role";
+
+        return await axiosInstance.get(`/users${queryString}`).then(res => res.data);
+    }
+
 }
 
 

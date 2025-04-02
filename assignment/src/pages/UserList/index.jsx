@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import UserService from "../../services/user.service.js";
-import { Link} from "react-router";
-import {Button, Rating,Pagination} from "@mui/material";
-import FormSearch from "./FormSearch.jsx";
+import { Link } from "react-router";
+import { Button, Rating, Pagination } from "@mui/material";
 import RoleService from "../../services/role.service.js";
 import {toast} from "react-toastify";
 
@@ -11,6 +10,7 @@ function UserList() {
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [selectedRole, setSelectedRole] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
     const [reloadData, setReloadData] = useState(false);
 
     // State phân trang
@@ -24,34 +24,31 @@ function UserList() {
     }, []);
 
     useEffect(() => {
-        if (selectedRole) {
-            UserService.getUsersByRole(selectedRole).then(res => {
-                setUsers(res.data);
-                setCurrentPage(1); // Reset về trang đầu khi filter
-            });
-        } else {
-            UserService.getAllUser().then(res => {
-                setUsers(res.data);
-                setCurrentPage(1);
-            });
-        }
-    }, [reloadData, selectedRole]);
+        UserService.getAllUser().then(res => {
+            setUsers(res.data);
+            setCurrentPage(1);
+        });
+    }, [reloadData]);
 
     const handleDeleteUser = (id) => {
         if (window.confirm('Are you sure you want to delete?')) {
             UserService.deleteUserById(id).then(() => {
-                alert("User deleted successfully");
+                toast.success("User deleted successfully");
                 setReloadData(!reloadData);
             });
         }
     };
 
-    const handleSearchUser = (e) => {
-        const keyword = e.target.value;
-        UserService.searchUserByName(keyword).then(res => {
-            setUsers(res.data);
+    const handleSubmitSearch = (e) => {
+        e.preventDefault();
+        UserService.getUsersByNameAndRole(searchKeyword, selectedRole).then(res => {
+            setUsers(res);
             setCurrentPage(1);
         });
+    };
+
+    const handleSearchInputChange = (e) => {
+        setSearchKeyword(e.target.value);
     };
 
     const handleRoleChange = (e) => {
@@ -60,15 +57,19 @@ function UserList() {
 
     const handleRatingUser = (newRating, id) => {
         UserService.updateRatingUser(newRating, id).then(() => {
-            alert("User rating updated successfully");
+            toast.success("User rating updated successfully");
             setReloadData(!reloadData);
         });
     };
 
+    // Sắp xếp danh sách users theo rating tăng dần
+    const sortedUsers = [...users].sort((a, b) => a.rating - b.rating);
+
     // Tính toán user hiển thị dựa trên trang hiện tại
     const indexOfLastUser = currentPage * usersPerPage;
     const indexOfFirstUser = indexOfLastUser - usersPerPage;
-    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    // const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+    const currentUsers = sortedUsers.slice(indexOfFirstUser, indexOfLastUser);
 
     return (
         <div className="d-flex flex-column align-items-center vh-100">
@@ -83,20 +84,22 @@ function UserList() {
             <div className="card shadow p-4 w-75">
                 <h5 className="card-header">User List</h5>
                 <div className="card-body">
-                    <div className="d-flex justify-content-between mb-3">
-                        <div className="w-25">
-                            <select className="form-select" value={selectedRole} onChange={handleRoleChange}>
-                                <option value="">All Roles</option>
-                                {roles.map(role => (
-                                    <option key={role.id} value={role.id}>{role.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="w-50">
-                            <FormSearch handleActionSearch={handleSearchUser}/>
-                        </div>
-                    </div>
+                    <form onSubmit={handleSubmitSearch} className="d-flex mb-3">
+                        <input
+                            type="text"
+                            className="form-control me-2"
+                            placeholder="Search by name..."
+                            value={searchKeyword}
+                            onChange={handleSearchInputChange}
+                        />
+                        <select className="form-select me-2" value={selectedRole} onChange={handleRoleChange}>
+                            <option value="">All Roles</option>
+                            {roles.map(role => (
+                                <option key={role.id} value={role.id}>{role.name}</option>
+                            ))}
+                        </select>
+                        <Button type="submit" variant="contained">Search</Button>
+                    </form>
 
                     <table className="table table-bordered">
                         <thead>

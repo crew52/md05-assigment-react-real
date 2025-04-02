@@ -39,8 +39,7 @@ function UserCreate() {
         onSubmit: values => {
             console.log(values);
             UserService.createUser(values).then(res => {
-                // toast.success("Create user successfully");
-                alert("Create user successfully");
+                toast.success("Create user successfully");
                 navigate("/users")
             })
         }
