@@ -1,12 +1,86 @@
 {
   "users": [
-    { "id": 1, "name": "nguyen van name 1", "email": "email1@gmail.com", "phone": "0987654321", "rating": 0, "roleId": 1 },
-    { "id": 2, "name": "nguyen van name 2", "email": "email2@gmail.com", "phone": "0987654322", "rating": 0, "roleId": 1 },
-    { "id": 3, "name": "nguyen van name 3", "email": "email3@gmail.com", "phone": "0987654323", "rating": 0, "roleId": 2 },
-    { "id": 4, "name": "nguyen van name 4", "email": "email4@gmail.com", "phone": "0987654324", "rating": 0, "roleId": 2 }
+    {
+      "name": "hhhhh",
+      "email": "email4@gmail.com",
+      "phone": "0987654324",
+      "roleId": 1,
+      "rating": 4,
+      "id": 4
+    },
+    {
+      "id": 5,
+      "name": "nguyen van name 5",
+      "email": "email5@gmail.com",
+      "phone": "0987654325",
+      "rating": 5,
+      "roleId": 1
+    },
+    {
+      "id": 6,
+      "name": "nguyen van name 9",
+      "email": "email5@gmail.com",
+      "phone": "0987654325",
+      "rating": 4,
+      "roleId": 1
+    },
+    {
+      "name": "nguyen van name 5",
+      "email": "email5@gmail.com",
+      "phone": "0987654325",
+      "roleId": 2,
+      "rating": 4,
+      "id": 9
+    },
+    {
+      "name": "1231",
+      "email": "qqq11@gmail.com",
+      "phone": "1321412418",
+      "roleId": 2,
+      "rating": 3,
+      "id": 13
+    },
+    {
+      "name": "dungnc11",
+      "email": "dungnc150602@gmail.com",
+      "phone": "1111111323",
+      "roleId": 1,
+      "rating": 3,
+      "id": 14
+    },
+    {
+      "name": "qqq11",
+      "email": "qqqq@gmail.com",
+      "phone": "3122222222",
+      "roleId": 1,
+      "rating": 4,
+      "id": 15
+    },
+    {
+      "name": "qqqq11111",
+      "email": "qqqq@gmail.com",
+      "phone": "1111111111",
+      "roleId": 1,
+      "rating": 0,
+      "id": 16
+    },
+    {
+      "name": "111111",
+      "email": "1111@gmail.com",
+      "phone": "1111111111",
+      "roleId": 1,
+      "rating": 0,
+      "id": 17
+    }
   ],
   "roles": [
-    { "id": 1, "name": "admin" },
-    { "id": 2, "name": "user" }
+    {
+      "id": 1,
+      "name": "admin"
+    },
+    {
+      "id": 2,
+      "name": "user"
+    }
   ]
 }
